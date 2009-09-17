@@ -1,0 +1,31 @@
+= semrush-client
+
+== DESCRIPTION:
+
+Client for the SEMRush API (http://www.semrush.com/api.html)
+
+== FEATURES/PROBLEMS:
+
+* FIX (list of features or problems)
+
+== SYNOPSIS:
+
+  require 'semrush/client'
+  c = SEMRush::Client.new("my_api_key")
+  c.by_organic(:domain => "example.com", :limit => 10, 
+               :offset => 5, :db => "us", :ip => "127.0.0.1")
+  c.related(:keywords => "cat dog")
+  c.url_report(:url => "http://example.com/")
+  
+  See docs for more
+
+== REQUIREMENTS:
+
+* FIX (list of requirements)
+
+== LICENSE:
+
+Copyright (c) 2009 Cramer Development, Inc.
+
+All rights reserved.
+
