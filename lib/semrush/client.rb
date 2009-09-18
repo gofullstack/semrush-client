@@ -61,9 +61,19 @@ module SEMRush
 
     # Related keyword report
     def related_keywords(q = "", options = {})
-      request("#{q}+(related)", options)
+      request("#{URI.escape(q)}+(related)", options)
     end
-    
+
+    # URL Report
+    def url_report(q = "", options = {})
+      q = "http://#{q}/" unless q.starts_with?("http")
+      result = request(q, options)
+
+      # A hash result means it just did a regular report, which isn't what we
+      # want
+      result.is_a?(Array) ? result : nil
+    end
+
     private
       # Try to request using one of the (by+*) methods
       def by(type = "", q = "", options = {})
@@ -71,11 +81,12 @@ module SEMRush
       end
       
       def request(q = "", options = {})
-        q = "q=#{URI.escape(q)}"
+        q = "q=#{q}"
         options.symbolize_keys!
         options[:key] = @api_key
         options[:uip] = options.delete(:ip)
         options.each_pair {|k, v| q += URI.escape("&#{k}=#{v}") unless v.nil? }
+
         response = Net::HTTP.start(API_HOST) do |http|
           http.get(API_ENDPOINT + q)
         end.body rescue "ERROR :: RESPONSE ERROR (-1)" # Make this error up
