@@ -122,8 +122,11 @@ module SEMRush
           k.to_sym
         end
 
+        # A length of 1 in an empty set
+        if csv.length == 1
+          []
         # convert a csv array w/ length = 2 into a hash
-        if csv.length == 2 
+        elsif csv.length == 2 
           csv[0].each_with_index do |header, index|
             data[format_key.call(header)] = csv[1][index].to_s
           end
