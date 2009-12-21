@@ -22,17 +22,17 @@ module SEMRush
       raise BadApiKeyError.new if @api_key.empty?
     end
 
-    # The method missing tries to make the api call with the parenthized 
+    # The method missing tries to make the api call with the parenthized
     # arguments (see samples on http://www.semrush.com/api.html)
     def method_missing(*args)
       method = args.shift
       q = args.shift.to_s || ""
       if q.empty?
-        raise ArgumentError.new("Domain name, URL, or keywords are required") 
+        raise ArgumentError.new("Domain name, URL, or keywords are required")
       end
       by(method, q, args.shift || {})
     end
-    
+
     # The main report, with no "by"
     def report(q = "", options = {})
       request(q, options)
@@ -43,7 +43,7 @@ module SEMRush
       by("organic_organic", q, options)
     end
 
-    # Competitors adwords actually uses by+adwords_adwords, which isn't nice 
+    # Competitors adwords actually uses by+adwords_adwords, which isn't nice
     # to look at either
     def competitors_adwords(q = "", options = {})
       by("adwords_adwords", q, options)
@@ -79,7 +79,7 @@ module SEMRush
       def by(type = "", q = "", options = {})
         request("#{q}+(by+#{type})", options)
       end
-      
+
       def request(q = "", options = {})
         q = "q=#{q}"
         options.symbolize_keys!
@@ -110,7 +110,7 @@ module SEMRush
       def parse(text = "")
         csv = CSV.parse(text.to_s, ";")
         data = {}
-        format_key = lambda do |k| 
+        format_key = lambda do |k|
           r = {
             /\s/ => "_",
             /[|\.|\)|\(]/ => "",
@@ -126,7 +126,7 @@ module SEMRush
         if csv.length == 1
           []
         # convert a csv array w/ length = 2 into a hash
-        elsif csv.length == 2 
+        elsif csv.length == 2
           csv[0].each_with_index do |header, index|
             data[format_key.call(header)] = csv[1][index].to_s
           end
@@ -137,7 +137,7 @@ module SEMRush
           keys = csv.shift.map(&format_key)
           string_data = csv.map {|row| row.map {|cell| cell.to_s } }
           string_data.map {|row| Hash[*keys.zip(row).flatten] }
-        else 
+        else
           csv
         end
       end
