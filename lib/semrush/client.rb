@@ -11,6 +11,7 @@ module SEMRush
   class BadApiKeyError < ResponseError; end;
   class BadQueryError < ResponseError; end;
   class NothingFoundError < ResponseError; end;
+  class UnknownError < StandardError; end;
 
   class Client
     VERSION = "0.0.1"
@@ -24,13 +25,16 @@ module SEMRush
 
     # The method missing tries to make the api call with the parenthized
     # arguments (see samples on http://www.semrush.com/api.html)
-    def method_missing(*args)
-      method = args.shift
-      q = args.shift.to_s || ""
-      if q.empty?
-        raise ArgumentError.new("Domain name, URL, or keywords are required")
+    ALLOWED_METHODS = [:organic, :adwords, :organic_organic, :adwords_adwords, :adwords_organic, :organic_adwords]
+    def method_missing(method, *args)
+      return super unless ALLOWED_METHODS.include?(method)
+      
+      query = args.shift.to_s
+      if query.empty?
+        raise ArgumentError.new("Domain name, URL, or keywords are required.")
       end
-      by(method, q, args.shift || {})
+      
+      by(method, query, args.shift || {})
     end
 
     # The main report, with no "by"
@@ -95,8 +99,8 @@ module SEMRush
 
       # Format and raise an error
       def error(text = "")
-        e = /ERROR\s(\d+)\s::\s(.*)/.match(text)
-        name = e[2].titleize || "Unknown"
+        e = /ERROR\s(\d+)\s::\s(.*)/.match(text) || {}
+        name = (e[2] || "Unknown").titleize
         code = e[1] || -1
         error_class = name.gsub(/\s/, "") + "Error"
 
@@ -122,23 +126,17 @@ module SEMRush
           k.to_sym
         end
 
-        # A length of 1 in an empty set
-        if csv.length == 1
-          []
-        # convert a csv array w/ length = 2 into a hash
-        elsif csv.length == 2
-          csv[0].each_with_index do |header, index|
-            data[format_key.call(header)] = csv[1][index].to_s
-          end
-          data
-        # make an array of hashes if more than 2 results
         # (thanks http://snippets.dzone.com/posts/show/3899)
-        elsif csv.length > 2
-          keys = csv.shift.map(&format_key)
-          string_data = csv.map {|row| row.map {|cell| cell.to_s } }
-          string_data.map {|row| Hash[*keys.zip(row).flatten] }
+        keys = csv.shift.map(&format_key)
+        string_data = csv.map {|row| row.map {|cell| cell.to_s } }
+        string_data.map {|row| Hash[*keys.zip(row).flatten] }
+      rescue CSV::IllegalFormatError => csvife
+        tries ||= 0
+        if (tries += 1) < 3
+          retry
         else
-          csv
+          raise CSV::IllegalFormatError.new("Bad format for CSV: #{text.inspect}").tap{|e|
+            e.set_backtrace(csvife.backtrace)}
         end
       end
   end
