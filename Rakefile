@@ -14,7 +14,7 @@ Jeweler::Tasks.new do |gemspec|
   gemspec.email = "support@cramerdev.com"
   gemspec.homepage = "http://cramerdev.com/"
   gemspec.authors = ["Cramer Development"]
-  gemspec.add_dependency(['capistrano','>= 2.0.2'])
+  gemspec.add_dependency('active_support', '>= 2.0.2')
 end
 
 require 'rake/testtask'
