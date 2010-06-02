@@ -1,7 +1,0 @@
-History.txt
-Manifest.txt
-README.rdoc
-Rakefile
-lib/semrush/client.rb
-test/test_helper.rb
-test/test_semrush-client.rb

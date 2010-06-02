@@ -1,8 +1,9 @@
 require 'uri'
+
 require 'net/http'
 require 'csv'
 require 'rubygems'
-require 'activesupport'
+require 'active_support'
 
 module SEMRush
   class ArgumentError < ArgumentError; end;
